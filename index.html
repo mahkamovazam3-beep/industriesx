@@ -1,0 +1,839 @@
+<style>
+:root {
+    --ink: #f2eee7;
+    --muted: #9ca4aa;
+    --line: #30383d;
+    --paper: #20272b;
+    --canvas: #151b1f;
+    --mint: #28483f;
+    --coral: #4b8dff;
+    --coral-dark: #2d68d4;
+    --shadow: 0 18px 50px rgba(0, 0, 0, .28);
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background:
+        radial-gradient(circle at 12% 8%, rgba(69, 108, 100, .20), transparent 30%),
+        radial-gradient(circle at 90% 85%, rgba(118, 62, 52, .16), transparent 28%),
+        var(--canvas);
+}
+
+button, input { font: inherit; }
+button { transition: transform .2s ease, background .2s ease, color .2s ease, box-shadow .2s ease; }
+button:active { transform: scale(.96); }
+
+.app {
+    min-height: 100vh;
+    max-width: 1440px;
+    margin: auto;
+    display: flex;
+    background: rgba(32, 39, 43, .93);
+    box-shadow: var(--shadow);
+}
+
+.sidebar {
+    width: 250px;
+    flex: 0 0 250px;
+    padding: 28px 18px;
+    display: flex;
+    flex-direction: column;
+    background: #1b2226;
+    border-right: 1px solid var(--line);
+}
+
+.brand { display: flex; align-items: center; gap: 11px; margin: 0 10px 46px; }
+.brand-mark, .logo, .big-logo {
+    display: grid;
+    place-items: center;
+    color: white;
+    background: linear-gradient(135deg, #2865d8, #57b8ff);
+    box-shadow: 0 10px 24px rgba(57, 139, 255, .28);
+}
+.brand-mark { width: 38px; height: 38px; border-radius: 12px; font: bold 16px Arial, sans-serif; animation: logoFloat 3.6s ease-in-out infinite; }
+.brand-name { position: relative; display: inline-block; width: 0; overflow: hidden; white-space: nowrap; color: #f5eee5; font: bold 18px Arial, sans-serif; letter-spacing: .02em; animation: typing 2.1s steps(11, end) .25s forwards; }
+.brand-name::after { content: ""; display: inline-block; width: 2px; height: 18px; margin-left: 5px; vertical-align: -3px; background: var(--coral); animation: cursor 1s steps(1) infinite; }
+.new-chat { width: 100%; padding: 12px 15px; border: 1px solid #38434a; border-radius: 12px; background: #293238; color: var(--ink); text-align: left; cursor: pointer; }
+.new-chat:hover { background: var(--coral-dark); }
+.side-label { margin: 34px 10px 12px; color: var(--muted); font: 11px Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+.side-link { display: flex; gap: 11px; align-items: center; padding: 11px 12px; color: #929da2; border-radius: 10px; font: 14px Arial, sans-serif; }
+.side-link.active { color: var(--ink); background: #293238; box-shadow: 0 5px 18px rgba(0, 0, 0, .12); }
+.side-footer { margin-top: auto; padding: 14px 10px; border-top: 1px solid var(--line); color: var(--muted); font: 12px Arial, sans-serif; line-height: 1.5; }
+.google-login { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; margin-top: 12px; padding: 11px 12px; border: 1px solid #3b474e; border-radius: 12px; color: var(--ink); background: #293238; cursor: pointer; font: 13px Arial, sans-serif; }
+.google-login:hover { border-color: #6e9fea; background: #303d45; }
+.account { display: none; align-items: center; gap: 8px; margin-top: 13px; color: var(--ink); font: 12px Arial, sans-serif; }
+.account.visible { display: flex; }
+.account img { width: 27px; height: 27px; border-radius: 50%; }
+
+.workspace { min-width: 0; flex: 1; display: flex; flex-direction: column; position: relative; }
+.header { height: 84px; padding: 18px 42px; display: flex; align-items: center; gap: 13px; border-bottom: 1px solid var(--line); background: rgba(32, 39, 43, .90); }
+.logo { width: 40px; height: 40px; border-radius: 12px; font: bold 15px Arial, sans-serif; animation: logoFloat 3.6s ease-in-out infinite; }
+.title { display: inline-block; width: 0; overflow: hidden; white-space: nowrap; font: bold 17px Arial, sans-serif; animation: typing 2.1s steps(11, end) .25s forwards; }
+.subtitle { margin-top: 4px; color: var(--muted); font: 11px Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.online { margin-left: auto; color: #4d956f; font: 12px Arial, sans-serif; }
+
+.chat { width: min(850px, 100%); flex: 1; overflow-y: auto; align-self: center; padding: 54px 30px 190px; }
+.message { display: flex; margin-bottom: 25px; animation: rise .35s ease both; }
+.message.ai { justify-content: flex-start; }
+.message.user { justify-content: flex-end; }
+.avatar { width: 32px; height: 32px; min-width: 32px; margin: 3px 11px 0 0; display: grid; place-items: center; border-radius: 10px; color: var(--coral-dark); background: var(--mint); font: bold 12px Arial, sans-serif; }
+.user .avatar { display: none; }
+.bubble { max-width: min(680px, 82%); padding: 16px 19px; border-radius: 17px; font: 16px/1.65 Georgia, "Times New Roman", serif; white-space: pre-wrap; }
+.ai .bubble { background: #293238; border: 1px solid #38434a; border-top-left-radius: 5px; }
+.user .bubble { color: white; background: var(--coral); border-top-right-radius: 5px; box-shadow: 0 8px 20px rgba(232, 116, 97, .18); }
+
+.welcome { max-width: 620px; margin: 22px auto 44px; text-align: center; animation: rise .55s ease both; }
+.big-logo { width: 70px; height: 70px; margin: 0 auto 22px; border-radius: 22px; font: bold 25px Arial, sans-serif; animation: logoFloat 3.6s ease-in-out infinite; }
+.welcome h1 { margin: 0; font: bold 38px/1.1 Georgia, "Times New Roman", serif; letter-spacing: 0; }
+.welcome p { margin: 16px auto 0; max-width: 510px; color: var(--muted); font: 16px/1.65 Arial, sans-serif; }
+.suggestions { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px; padding: 5px 0 15px; }
+.suggestion { padding: 10px 14px; border: 1px solid var(--line); border-radius: 999px; color: #b7c0c1; background: #252e33; font: 13px Arial, sans-serif; cursor: pointer; }
+.suggestion:hover { color: var(--coral-dark); border-color: #e8b1a6; background: #fff7f4; }
+
+.input-area { position: fixed; z-index: 5; bottom: 0; left: calc(50% + 125px); transform: translateX(-50%); width: min(850px, calc(100% - 290px)); padding: 20px 0 25px; background: linear-gradient(transparent, rgba(255, 253, 249, .96) 28%); }
+.input-box { display: flex; align-items: center; padding: 8px; border: 1px solid #3b474e; border-radius: 19px; background: rgba(37, 46, 51, .97); box-shadow: 0 12px 30px rgba(0, 0, 0, .24); }
+.image-preview { display: none; align-items: center; gap: 10px; padding: 0 12px 8px; color: var(--muted); font: 12px Arial, sans-serif; }
+.image-preview img { width: 52px; height: 52px; object-fit: cover; border-radius: 10px; }
+.image-generator { display: none; gap: 8px; padding: 0 0 10px; }
+.image-generator.visible { display: flex; }
+.image-generator input { flex: 1; min-width: 0; padding: 11px 13px; border: 1px solid var(--line); border-radius: 12px; outline: none; color: var(--ink); background: #252e33; }
+.generate-button { padding: 0 15px; border: 0; border-radius: 12px; color: white; background: #4d956f; cursor: pointer; }
+.image-button { width: 38px; height: 38px; border: 0; border-radius: 11px; color: #788286; background: transparent; font-size: 18px; cursor: pointer; }
+.image-button:hover { color: var(--coral-dark); background: #fff0ec; }
+.voice-button.listening { color: white; background: var(--coral); animation: pulse 1.2s infinite; }
+.voice-output.active { color: #3b7457; background: var(--mint); }
+.remove-image { color: var(--coral-dark); }
+.speak-message, .copy-message { margin-top: 8px; padding: 0; border: 0; color: #9aa2a1; background: transparent; font-size: 15px; cursor: pointer; }
+.copy-message { margin-left: 12px; }
+.speak-message:hover, .copy-message:hover { color: var(--coral-dark); }
+.input-box input { flex: 1; min-width: 0; padding: 13px; border: 0; outline: none; color: var(--ink); background: transparent; font: 15px Arial, sans-serif; }
+.input-box input::placeholder { color: #a0a6a6; }
+.send { width: 43px; height: 43px; border: 0; border-radius: 14px; color: white; background: var(--coral); font-size: 19px; cursor: pointer; }
+.send:hover { background: var(--coral-dark); box-shadow: 0 7px 16px rgba(57, 139, 255, .25); }
+.typing { display: none; margin: 0 0 15px 43px; color: var(--muted); font: 13px Arial, sans-serif; }
+.dots span { animation: blink 1.4s infinite; }
+.dots span:nth-child(2) { animation-delay: .2s; }
+.dots span:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 0%, 80%, 100% { opacity: .2; } 40% { opacity: 1; } }
+@keyframes pulse { 50% { box-shadow: 0 0 0 8px rgba(232, 116, 97, .16); } }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes logoFloat { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-4px) rotate(2deg); } }
+@keyframes cursor { 50% { opacity: 0; } }
+@keyframes typing { from { width: 0; } to { width: 11ch; } }
+
+@media (max-width: 760px) {
+    .sidebar { display: none; }
+    .header { height: 72px; padding: 14px 18px; }
+    .chat { padding: 34px 16px 180px; }
+    .welcome h1 { font-size: 30px; }
+    .bubble { max-width: 90%; font-size: 15px; }
+    .input-area { left: 0; transform: none; width: 100%; padding: 14px 12px 18px; }
+    .subtitle { display: none; }
+    .online { font-size: 11px; }
+    .image-button { width: 34px; }
+}
+
+}
+
+@keyframes pulse {
+    50% {
+        box-shadow: 0 0 0 8px rgba(248, 113, 113, .16);
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-mark">IX</div>
+            <div class="brand-name">IndustriesX</div>
+        </div>
+
+        <button class="new-chat" type="button" onclick="startNewChat()">＋ Новый диалог</button>
+        <div class="google-login" id="googleLogin"></div>
+        <div class="account" id="account"></div>
+        <div class="side-label">Рабочее пространство</div>
+        <div class="side-link active">✦ Умный помощник</div>
+        <div class="side-link">◌ Мои изображения</div>
+        <div class="side-footer">Создано Азамом<br>Технологии для умного будущего</div>
+    </aside>
+
+    <section class="workspace">
+
+    <!-- HEADER -->
+
+    <header class="header">
+
+        <div class="logo">
+            IX
+        </div>
+
+        <div>
+            <div class="title">
+        <script src="https://accounts.google.com/gsi/client" async defer onload="setupGoogleLogin()"></script>
+
+                IndustriesX
+            </div>
+
+            <div class="subtitle">
+                AI ASSISTANT • SMART TECHNOLOGY
+            </div>
+        </div>
+
+        <div class="online">
+            ● ONLINE
+        </div>
+
+    </header>
+
+
+    <!-- CHAT -->
+
+    <main class="chat" id="chat">
+
+        <div class="welcome" id="welcome">
+
+            <div class="big-logo">
+                IX
+            </div>
+
+            <h1>
+                Привет, Азам 👋
+            </h1>
+
+            <p>
+                Я AI-помощник IndustriesX.
+                <br>
+                Помогаю Азаму с роботами, технологиями,
+                идеями и созданием новых проектов.
+            </p>
+
+        </div>
+
+
+        <div class="suggestions" id="suggestions">
+
+            <button class="suggestion"
+                onclick="quickMessage('Расскажи о моём роботе')">
+                🤖 Мой робот
+            </button>
+
+            <button class="suggestion"
+                onclick="quickMessage('Как работает датчик расстояния?')">
+                📏 Датчик расстояния
+            </button>
+
+            <button class="suggestion"
+                onclick="quickMessage('Что делать если обнаружен огонь?')">
+                🔥 Огонь
+            </button>
+
+        </div>
+
+
+        <div class="typing" id="typing">
+
+            🤖 AI печатает
+            <span class="dots">
+                <span>●</span>
+                <span>●</span>
+                <span>●</span>
+            </span>
+
+        </div>
+
+    </main>
+
+
+    <!-- INPUT -->
+
+    <div class="input-area">
+
+        <div class="image-preview" id="imagePreview">
+            <img id="previewImage" alt="Выбранное изображение">
+            <span>Изображение готово к отправке</span>
+            <button class="image-button remove-image" type="button" onclick="clearImage()" title="Удалить изображение">×</button>
+        </div>
+
+        <div class="image-generator" id="imageGenerator">
+            <input id="imagePrompt" type="text" placeholder="Что нарисовать? Например: робот в умном городе" autocomplete="off">
+            <button class="generate-button" type="button" onclick="generateImage()">Создать</button>
+        </div>
+
+        <div class="input-box">
+
+            <button class="image-button" type="button" onclick="imageInput.click()" title="Выбрать изображение">📎</button>
+            <button class="image-button" type="button" onclick="cameraInput.click()" title="Сделать фото камерой">📷</button>
+            <button class="image-button" type="button" onclick="toggleImageGenerator()" title="Создать изображение">🎨</button>
+            <button class="image-button voice-button" id="voiceButton" type="button" onclick="toggleVoice()" title="Говорить голосом">🎙️</button>
+            <button class="image-button voice-output" id="voiceOutputButton" type="button" onclick="toggleVoiceOutput()" title="Включить голосовые ответы">🔊</button>
+
+            <input id="imageInput" type="file" accept="image/*" hidden>
+            <input id="cameraInput" type="file" accept="image/*" capture="environment" hidden>
+
+            <input
+                id="messageInput"
+                type="text"
+                placeholder="Напишите сообщение..."
+                autocomplete="off"
+            >
+
+            <button
+                class="send"
+                onclick="sendMessage()">
+                ➤
+            </button>
+
+        </div>
+
+    </div>
+
+    </section>
+
+</div>
+
+
+<script>
+
+const input =
+document.getElementById("messageInput");
+
+const chat =
+document.getElementById("chat");
+
+const typing =
+document.getElementById("typing");
+
+const welcome =
+document.getElementById("welcome");
+
+const suggestions =
+document.getElementById("suggestions");
+
+const imageInput =
+document.getElementById("imageInput");
+
+const cameraInput =
+document.getElementById("cameraInput");
+
+const imagePreview =
+document.getElementById("imagePreview");
+
+const previewImage =
+document.getElementById("previewImage");
+
+const voiceButton =
+document.getElementById("voiceButton");
+
+const voiceOutputButton =
+document.getElementById("voiceOutputButton");
+
+const imageGenerator =
+document.getElementById("imageGenerator");
+
+const imagePrompt =
+document.getElementById("imagePrompt");
+
+const googleLogin =
+document.getElementById("googleLogin");
+
+const account =
+document.getElementById("account");
+
+let selectedImage = null;
+let recognition = null;
+let voiceOutputEnabled = true;
+let restoringHistory = false;
+const historyKey = "industriesx-chat-history";
+
+async function setupGoogleLogin() {
+    const config = await fetch("/api/config").then(function(response) {
+        return response.json();
+    });
+
+    if (!config.googleClientId || !window.google?.accounts?.id) {
+        googleLogin.textContent = "G  Вход через Google не настроен";
+        googleLogin.title = "Добавь GOOGLE_CLIENT_ID в .env";
+        return;
+    }
+
+    window.google.accounts.id.initialize({
+        client_id: config.googleClientId,
+        callback: handleGoogleCredential
+    });
+    window.google.accounts.id.renderButton(googleLogin, {
+        theme: "filled_black",
+        size: "large",
+        text: "signin_with",
+        shape: "rectangular",
+        width: 210
+    });
+}
+
+async function handleGoogleCredential(response) {
+    try {
+        const result = await fetch("/api/auth/google", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ credential: response.credential })
+        });
+        const data = await result.json();
+
+        if (!result.ok) {
+            throw new Error(data.error || "Ошибка входа");
+        }
+
+        googleLogin.style.display = "none";
+        account.classList.add("visible");
+        account.innerHTML = "";
+
+        const avatar = document.createElement("img");
+        avatar.src = data.user.picture;
+        avatar.alt = "Аватар пользователя";
+        const name = document.createElement("span");
+        name.textContent = data.user.name;
+        account.append(avatar, name);
+        addMessage("Вход выполнен успешно. Привет, " + data.user.name + "! 👋", "ai");
+    } catch (error) {
+        addMessage(error.message, "ai");
+    }
+}
+
+const SpeechRecognition =
+window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.lang = "ru-RU";
+    recognition.interimResults = false;
+    recognition.continuous = false;
+
+    recognition.onstart = function() {
+        voiceButton.classList.add("listening");
+        voiceButton.textContent = "⏹️";
+        voiceButton.title = "Остановить запись";
+    };
+
+    recognition.onresult = function(event) {
+        input.value = event.results[0][0].transcript;
+        sendMessage();
+    };
+
+    recognition.onerror = function() {
+        addMessage("Не удалось распознать речь. Попробуй еще раз. 🎙️", "ai");
+    };
+
+    recognition.onend = resetVoiceButton;
+} else {
+    voiceButton.title = "Голосовой ввод не поддерживается этим браузером";
+}
+
+
+/* ================= MESSAGE ================= */
+
+function addMessage(text, type, imageSrc = "") {
+
+    const message =
+    document.createElement("div");
+
+    message.className =
+    "message " + type;
+
+
+    const avatar =
+    document.createElement("div");
+
+    avatar.className =
+    "avatar";
+
+    avatar.textContent =
+    type === "ai" ? "🤖" : "👤";
+
+
+    const bubble =
+    document.createElement("div");
+
+    bubble.className =
+    "bubble";
+
+    bubble.textContent =
+    text;
+
+    if (imageSrc) {
+        const image = document.createElement("img");
+        image.src = imageSrc;
+        image.alt = "Отправленное изображение";
+        image.style.maxWidth = "220px";
+        image.style.display = "block";
+        image.style.marginTop = text ? "10px" : "0";
+        bubble.appendChild(image);
+    }
+
+    if (type === "ai" && text) {
+        const speakButton = document.createElement("button");
+        speakButton.className = "speak-message";
+        speakButton.type = "button";
+        speakButton.textContent = "🔊";
+        speakButton.title = "Прочитать ответ вслух";
+        speakButton.onclick = function() {
+            speakText(text);
+        };
+        bubble.appendChild(speakButton);
+
+        const copyButton = document.createElement("button");
+        copyButton.className = "copy-message";
+        copyButton.type = "button";
+        copyButton.textContent = "📋";
+        copyButton.title = "Скопировать ответ";
+        copyButton.onclick = function() {
+            copyMessage(text, copyButton);
+        };
+        bubble.appendChild(copyButton);
+    }
+
+
+    message.appendChild(avatar);
+
+    message.appendChild(bubble);
+
+    chat.insertBefore(
+        message,
+        typing
+    );
+
+
+    chat.scrollTop =
+    chat.scrollHeight;
+
+    if (!restoringHistory) {
+        saveMessage(text, type, imageSrc);
+    }
+
+}
+
+function saveMessage(text, type, imageSrc) {
+    const history = JSON.parse(localStorage.getItem(historyKey) || "[]");
+    history.push({ text, type, imageSrc });
+    localStorage.setItem(historyKey, JSON.stringify(history.slice(-50)));
+}
+
+function restoreHistory() {
+    const history = JSON.parse(localStorage.getItem(historyKey) || "[]");
+
+    if (!history.length) {
+        return;
+    }
+
+    restoringHistory = true;
+    welcome.style.display = "none";
+    suggestions.style.display = "none";
+
+    history.forEach(function(item) {
+        addMessage(item.text, item.type, item.imageSrc || "");
+    });
+
+    restoringHistory = false;
+}
+
+function startNewChat() {
+    localStorage.removeItem(historyKey);
+    window.location.reload();
+}
+
+
+/* ================= SEND ================= */
+
+async function sendMessage() {
+
+    const text =
+    input.value.trim();
+
+
+    if (!text && !selectedImage) {
+        return;
+    }
+
+    const image = selectedImage;
+    const imageSrc = image ? image.dataUrl : "";
+
+
+    welcome.style.display =
+    "none";
+
+    suggestions.style.display =
+    "none";
+
+
+    addMessage(text || "Посмотри это изображение 📷", "user", imageSrc);
+
+    clearImage();
+
+
+    input.value = "";
+
+
+    typing.style.display =
+    "block";
+
+
+    try {
+
+        /*
+         * Здесь будет наш серверный
+         * endpoint OpenAI.
+         */
+
+        const response =
+        await fetch("/api/chat", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            body: JSON.stringify({
+                message: text,
+                image: image ? {
+                    mimeType: image.mimeType,
+                    data: image.data
+                } : null
+            })
+
+        });
+
+
+        const data =
+        await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Ошибка сервера");
+        }
+
+
+        addMessage(
+            data.reply,
+            "ai"
+        );
+
+        speakText(data.reply);
+
+
+    } catch (error) {
+
+        let errorMessage =
+        "Не удалось подключиться к AI. Попробуйте еще раз позже.";
+
+        if (error.message) {
+            errorMessage = error.message;
+        }
+
+        addMessage(errorMessage, "ai");
+
+        console.error(error);
+
+    }
+
+
+    typing.style.display =
+    "none";
+
+}
+
+function selectImage(event) {
+    const file = event.target.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function() {
+        const dataUrl = reader.result;
+        selectedImage = {
+            mimeType: file.type,
+            data: dataUrl.split(",")[1],
+            dataUrl
+        };
+        previewImage.src = dataUrl;
+        imagePreview.style.display = "flex";
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearImage() {
+    selectedImage = null;
+    imagePreview.style.display = "none";
+    imageInput.value = "";
+    cameraInput.value = "";
+}
+
+function toggleImageGenerator() {
+    imageGenerator.classList.toggle("visible");
+
+    if (imageGenerator.classList.contains("visible")) {
+        imagePrompt.focus();
+    }
+}
+
+async function generateImage() {
+    const prompt = imagePrompt.value.trim();
+
+    if (!prompt) {
+        imagePrompt.focus();
+        return;
+    }
+
+    addMessage("Создаю изображение по описанию: " + prompt + " 🎨", "user");
+    imagePrompt.value = "";
+    imageGenerator.classList.remove("visible");
+    typing.style.display = "block";
+
+    try {
+        const response = await fetch("/api/generate-image", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt })
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Не удалось создать изображение.");
+        }
+
+        addMessage("Готово! Изображение создано ✅", "ai", data.image);
+    } catch (error) {
+        addMessage(error.message, "ai");
+    } finally {
+        typing.style.display = "none";
+    }
+}
+
+function toggleVoice() {
+    if (!recognition) {
+        addMessage("Твой браузер не поддерживает голосовой ввод. Попробуй Google Chrome или Microsoft Edge. 🌐", "ai");
+        return;
+    }
+
+    if (voiceButton.classList.contains("listening")) {
+        recognition.stop();
+        return;
+    }
+
+    recognition.start();
+}
+
+function resetVoiceButton() {
+    voiceButton.classList.remove("listening");
+    voiceButton.textContent = "🎙️";
+    voiceButton.title = "Говорить голосом";
+}
+
+function toggleVoiceOutput() {
+    voiceOutputEnabled = !voiceOutputEnabled;
+    voiceOutputButton.classList.toggle("active", voiceOutputEnabled);
+    voiceOutputButton.textContent = voiceOutputEnabled ? "🔊" : "🔇";
+    voiceOutputButton.title = voiceOutputEnabled
+        ? "Выключить голосовые ответы"
+        : "Включить голосовые ответы";
+
+    if (!voiceOutputEnabled && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+    }
+}
+
+function speakText(text) {
+    if (!voiceOutputEnabled || !("speechSynthesis" in window)) {
+        return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "ru-RU";
+    utterance.rate = 1;
+    utterance.pitch = 1;
+
+    const russianVoice = window.speechSynthesis
+        .getVoices()
+        .find(function(voice) {
+            return voice.lang.toLowerCase().startsWith("ru");
+        });
+
+    if (russianVoice) {
+        utterance.voice = russianVoice;
+    }
+
+    window.speechSynthesis.speak(utterance);
+}
+
+async function copyMessage(text, button) {
+    try {
+        await navigator.clipboard.writeText(text);
+        button.textContent = "✅";
+        button.title = "Скопировано";
+        setTimeout(function() {
+            button.textContent = "📋";
+            button.title = "Скопировать ответ";
+        }, 1500);
+    } catch (error) {
+        button.textContent = "❌";
+        button.title = "Не удалось скопировать";
+        console.error(error);
+    }
+}
+
+if (!("speechSynthesis" in window)) {
+    voiceOutputButton.disabled = true;
+    voiceOutputButton.title = "Голосовые ответы не поддерживаются этим браузером";
+}
+
+imageInput.addEventListener("change", selectImage);
+cameraInput.addEventListener("change", selectImage);
+
+
+/* ================= QUICK MESSAGE ================= */
+
+function quickMessage(text) {
+
+    input.value =
+    text;
+
+    sendMessage();
+
+}
+
+
+/* ================= ENTER ================= */
+
+input.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "Enter"
+        ) {
+
+            sendMessage();
+
+        }
+
+    }
+);
+
+restoreHistory();
+
+</script>
+
+</body>
+</html>
