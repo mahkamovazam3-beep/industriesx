@@ -136,16 +136,6 @@ button:active { transform: scale(.96); }
     .subtitle { display: none; }
     .online { font-size: 11px; }
     .image-button { width: 34px; }
-}
-
-}
-
-@keyframes pulse {
-    50% {
-        box-shadow: 0 0 0 8px rgba(248, 113, 113, .16);
-    }
-}
-
 </style>
 </head>
 
@@ -180,8 +170,6 @@ button:active { transform: scale(.96); }
 
         <div>
             <div class="title">
-        <script src="https://accounts.google.com/gsi/client" async defer onload="setupGoogleLogin()"></script>
-
                 IndustriesX
             </div>
 
@@ -301,6 +289,8 @@ button:active { transform: scale(.96); }
     </section>
 
 </div>
+
+<script src="https://accounts.google.com/gsi/client" async defer onload="setupGoogleLogin()"></script>
 
 
 <script>
