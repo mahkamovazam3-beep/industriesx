@@ -2,7 +2,10 @@ const express = require("express");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { GoogleGenAI } = require("@google/genai");
 const { OAuth2Client } = require("google-auth-library");
+const { execFile } = require("child_process");
+const path = require("path");
 require("dotenv").config({ override: true });
+const ESP32_IP = process.env.ESP32_IP || "";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -65,6 +68,11 @@ app.post("/api/chat", async (req, res) => {
     try {
         const rawMessage = req.body.message?.trim() || "";
         const image = req.body.image;
+        const styleInstructions = {
+            compact: "Отвечай кратко: сначала прямой ответ, затем только необходимые шаги.",
+            formal: "Отвечай строго и профессионально, без эмодзи и лишних вступлений.",
+            default: "Отвечай дружелюбно и понятно, используя короткие абзацы и уместные списки."
+        };
 
         if (!rawMessage && !image) {
             return res.status(400).json({
@@ -72,7 +80,7 @@ app.post("/api/chat", async (req, res) => {
             });
         }
 
-        const message = rawMessage || "Опиши это изображение.";
+        const message = (rawMessage || "Опиши это изображение.") + "\n\n" + (styleInstructions[req.body.style] || styleInstructions.default);
 
         const content = image
             ? [
@@ -160,5 +168,130 @@ app.post("/api/generate-image", async (req, res) => {
                 : "Генерация изображения временно недоступна.";
 
         res.status(status).json({ error: errorMessage });
+    }
+});
+
+app.post("/api/device-action", (req, res) => {
+    const action = req.body.action;
+    const projectFolder = __dirname;
+    const desktop = process.env.USERPROFILE ? path.join(process.env.USERPROFILE, "Desktop") : projectFolder;
+    const screenshotPath = path.join(desktop, "mimo-screenshot.png");
+    const actions = {
+        browser: {
+            args: ["/c", "start", "", "https://www.google.com"],
+            message: "Браузер открыт."
+        },
+        music: {
+            args: ["/c", "start", "", "https://music.youtube.com"],
+            message: "Музыкальный сервис открыт."
+        },
+        folder: {
+            args: ["/c", "start", "", projectFolder],
+            message: "Папка проекта открыта."
+        },
+        mute: {
+            args: ["-NoProfile", "-Command", "Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public class Audio { [DllImport(\"user32.dll\")] public static extern void keybd_event(byte key, byte scan, uint flags, UIntPtr extra); }'; [Audio]::keybd_event(173, 0, 0, [UIntPtr]::Zero)"],
+            file: "powershell.exe",
+            message: "Звук переключен."
+        },
+        screenshot: {
+            args: ["-NoProfile", "-Command", "$path = '" + screenshotPath.replace(/'/g, "''") + "'; Add-Type -AssemblyName System.Windows.Forms; Add-Type -AssemblyName System.Drawing; $screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds; $bitmap = New-Object System.Drawing.Bitmap $screen.Width, $screen.Height; $graphics = [System.Drawing.Graphics]::FromImage($bitmap); $graphics.CopyFromScreen($screen.Location, [System.Drawing.Point]::Empty, $screen.Size); $bitmap.Save($path, [System.Drawing.Imaging.ImageFormat]::Png); $graphics.Dispose(); $bitmap.Dispose()"],
+            file: "powershell.exe",
+            message: "Скриншот сохранен на рабочий стол как mimo-screenshot.png."
+        },
+        battery: {
+            args: ["-NoProfile", "-Command", "(Get-CimInstance Win32_Battery | Select-Object -First 1 -ExpandProperty EstimatedChargeRemaining)"],
+            file: "powershell.exe",
+            message: ""
+        }
+    };
+
+    if (process.platform !== "win32" || !actions[action]) {
+        return res.status(400).json({ error: "Это действие недоступно на данном компьютере." });
+    }
+
+    const selected = actions[action];
+    execFile(selected.file || "cmd.exe", selected.args, { windowsHide: true }, (error, stdout) => {
+        if (error) return res.status(500).json({ error: "Не удалось выполнить действие." });
+        const message = action === "battery"
+            ? (stdout.trim() ? "Заряд батареи: " + stdout.trim() + "%." : "Батарея не обнаружена.")
+            : selected.message;
+        res.json({ message });
+    });
+});
+
+// ========================================
+// 🤖 УПРАВЛЕНИЕ ESP32-C3
+// ========================================
+
+app.post("/api/robot-command", async (req, res) => {
+    try {
+        const command = req.body.command;
+
+        const allowedCommands = [
+            "forward",
+            "back",
+            "left",
+            "right",
+            "stop"
+        ];
+
+        if (!allowedCommands.includes(command)) {
+            return res.status(400).json({
+                error: "Неизвестная команда робота."
+            });
+        }
+
+        if (!ESP32_IP) {
+            return res.status(503).json({
+                error: "ESP32_IP не указан в .env."
+            });
+        }
+
+        let baseUrl;
+        try {
+            baseUrl = new URL(ESP32_IP);
+            if (!['http:', 'https:'].includes(baseUrl.protocol)) throw new Error();
+        } catch {
+            return res.status(500).json({ error: "ESP32_IP имеет неверный формат." });
+        }
+
+        const url = new URL(command, `${baseUrl.toString().replace(/\/$/, "")}/`).toString();
+        const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+
+        if (!response.ok) {
+            throw new Error(`ESP32 ответил: ${response.status}`);
+        }
+
+        const result = await response.text();
+
+        res.json({
+            success: true,
+            command: command,
+            esp32: result
+        });
+
+    } catch (error) {
+        console.error("Ошибка связи с ESP32:", error.message);
+
+        res.status(503).json({
+            error: "Не удалось связаться с ESP32.",
+            details: error.message
+        });
+    }
+});
+
+app.get("/api/robot-status", async (req, res) => {
+    if (!ESP32_IP) {
+        return res.json({ connected: false, error: "ESP32_IP не указан в .env." });
+    }
+
+    try {
+        const baseUrl = new URL(ESP32_IP);
+        if (!['http:', 'https:'].includes(baseUrl.protocol)) throw new Error("Неверный протокол");
+        const response = await fetch(baseUrl, { signal: AbortSignal.timeout(3000) });
+        res.json({ connected: response.ok, status: response.status });
+    } catch (error) {
+        res.json({ connected: false, error: error.message });
     }
 });

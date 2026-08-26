@@ -1,141 +1,703 @@
 <style>
 :root {
-    --ink: #f2eee7;
-    --muted: #9ca4aa;
-    --line: #30383d;
-    --paper: #20272b;
-    --canvas: #151b1f;
-    --mint: #28483f;
-    --coral: #4b8dff;
-    --coral-dark: #2d68d4;
-    --shadow: 0 18px 50px rgba(0, 0, 0, .28);
+    --bg-900: #07111c;
+    --bg-800: #0d1d2d;
+    --bg-700: #10273a;
+    --panel: rgba(15, 24, 35, 0.78);
+    --panel-strong: rgba(19, 29, 42, 0.95);
+    --panel-soft: rgba(25, 38, 52, 0.8);
+    --line: rgba(148, 179, 214, 0.18);
+    --line-strong: rgba(156, 193, 236, 0.35);
+    --text: #edf6ff;
+    --muted: #9ab0c5;
+    --blue: #67d6ff;
+    --blue-strong: #3ea5ff;
+    --purple: #9087ff;
+    --cyan: #6af0d5;
+    --orange: #ff9a6b;
+    --shadow: 0 28px 80px rgba(1, 8, 18, 0.6);
 }
 
 * { box-sizing: border-box; }
 
-body {
+html, body {
     margin: 0;
-    min-height: 100vh;
-    font-family: Georgia, "Times New Roman", serif;
-    color: var(--ink);
+    min-height: 100%;
+    font-family: "Segoe UI", Arial, sans-serif;
     background:
-        radial-gradient(circle at 12% 8%, rgba(69, 108, 100, .20), transparent 30%),
-        radial-gradient(circle at 90% 85%, rgba(118, 62, 52, .16), transparent 28%),
-        var(--canvas);
+        radial-gradient(circle at top left, rgba(103, 214, 255, 0.18), transparent 28%),
+        radial-gradient(circle at 80% 15%, rgba(144, 135, 255, 0.22), transparent 30%),
+        linear-gradient(135deg, var(--bg-900) 0%, #091621 30%, #0d1d2d 100%);
+    color: var(--text);
 }
 
+body { min-height: 100vh; }
+
 button, input { font: inherit; }
-button { transition: transform .2s ease, background .2s ease, color .2s ease, box-shadow .2s ease; }
-button:active { transform: scale(.96); }
+button {
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+    cursor: pointer;
+}
+button:active { transform: scale(.98); }
 
 .app {
     min-height: 100vh;
-    max-width: 1440px;
-    margin: auto;
     display: flex;
-    background: rgba(32, 39, 43, .93);
+    max-width: 1500px;
+    margin: 0 auto;
+    background: rgba(10, 18, 26, 0.6);
+    backdrop-filter: blur(18px);
     box-shadow: var(--shadow);
 }
 
 .sidebar {
-    width: 250px;
-    flex: 0 0 250px;
-    padding: 28px 18px;
+    width: 280px;
+    flex: 0 0 280px;
+    padding: 28px 18px 20px;
     display: flex;
     flex-direction: column;
-    background: #1b2226;
+    background: rgba(8, 15, 23, 0.8);
     border-right: 1px solid var(--line);
 }
 
-.brand { display: flex; align-items: center; gap: 11px; margin: 0 10px 46px; }
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 8px 34px;
+    padding: 8px 6px;
+}
+
 .brand-mark, .logo, .big-logo {
     display: grid;
     place-items: center;
-    color: white;
-    background: linear-gradient(135deg, #2865d8, #57b8ff);
-    box-shadow: 0 10px 24px rgba(57, 139, 255, .28);
+    border-radius: 18px;
+    color: #06131d;
+    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    box-shadow: 0 16px 36px rgba(96, 199, 255, 0.35);
 }
-.brand-mark { width: 38px; height: 38px; border-radius: 12px; font: bold 16px Arial, sans-serif; animation: logoFloat 3.6s ease-in-out infinite; }
-.brand-name { position: relative; display: inline-block; width: 0; overflow: hidden; white-space: nowrap; color: #f5eee5; font: bold 18px Arial, sans-serif; letter-spacing: .02em; animation: typing 2.1s steps(11, end) .25s forwards; }
-.brand-name::after { content: ""; display: inline-block; width: 2px; height: 18px; margin-left: 5px; vertical-align: -3px; background: var(--coral); animation: cursor 1s steps(1) infinite; }
-.new-chat { width: 100%; padding: 12px 15px; border: 1px solid #38434a; border-radius: 12px; background: #293238; color: var(--ink); text-align: left; cursor: pointer; }
-.new-chat:hover { background: var(--coral-dark); }
-.side-label { margin: 34px 10px 12px; color: var(--muted); font: 11px Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
-.side-link { display: flex; gap: 11px; align-items: center; padding: 11px 12px; color: #929da2; border-radius: 10px; font: 14px Arial, sans-serif; }
-.side-link.active { color: var(--ink); background: #293238; box-shadow: 0 5px 18px rgba(0, 0, 0, .12); }
-.side-footer { margin-top: auto; padding: 14px 10px; border-top: 1px solid var(--line); color: var(--muted); font: 12px Arial, sans-serif; line-height: 1.5; }
-.google-login { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; margin-top: 12px; padding: 11px 12px; border: 1px solid #3b474e; border-radius: 12px; color: var(--ink); background: #293238; cursor: pointer; font: 13px Arial, sans-serif; }
-.google-login:hover { border-color: #6e9fea; background: #303d45; }
-.account { display: none; align-items: center; gap: 8px; margin-top: 13px; color: var(--ink); font: 12px Arial, sans-serif; }
+
+.brand-mark {
+    width: 42px;
+    height: 42px;
+    font: 700 15px/1 "Segoe UI", sans-serif;
+}
+
+.brand-name {
+    font: 700 18px/1.2 "Segoe UI", sans-serif;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    white-space: nowrap;
+}
+
+.new-chat {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1px solid rgba(124, 168, 220, 0.2);
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(103, 214, 255, 0.12), rgba(144, 135, 255, 0.12));
+    color: var(--text);
+    text-align: left;
+    font-weight: 600;
+}
+
+.new-chat:hover {
+    border-color: rgba(103, 214, 255, 0.5);
+    box-shadow: 0 12px 30px rgba(96, 199, 255, 0.12);
+}
+
+.side-label {
+    margin: 28px 10px 10px;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.side-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 12px;
+    border-radius: 12px;
+    color: #b4c7d7;
+    font-size: 14px;
+    background: transparent;
+}
+
+.side-link.active {
+    color: var(--text);
+    background: linear-gradient(135deg, rgba(103, 214, 255, 0.12), rgba(144, 135, 255, 0.06));
+    border: 1px solid rgba(137, 175, 245, 0.12);
+}
+
+.side-footer {
+    margin-top: auto;
+    padding: 18px 12px 8px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.google-login {
+    margin-top: 12px;
+    min-height: 46px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: rgba(17, 28, 39, 0.9);
+    color: var(--text);
+    font-weight: 600;
+}
+
+.account {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: rgba(17, 28, 39, 0.9);
+    color: var(--text);
+    font-size: 13px;
+}
+
 .account.visible { display: flex; }
-.account img { width: 27px; height: 27px; border-radius: 50%; }
+.account img { width: 28px; height: 28px; border-radius: 50%; }
 
-.workspace { min-width: 0; flex: 1; display: flex; flex-direction: column; position: relative; }
-.header { height: 84px; padding: 18px 42px; display: flex; align-items: center; gap: 13px; border-bottom: 1px solid var(--line); background: rgba(32, 39, 43, .90); }
-.logo { width: 40px; height: 40px; border-radius: 12px; font: bold 15px Arial, sans-serif; animation: logoFloat 3.6s ease-in-out infinite; }
-.title { display: inline-block; width: 0; overflow: hidden; white-space: nowrap; font: bold 17px Arial, sans-serif; animation: typing 2.1s steps(11, end) .25s forwards; }
-.subtitle { margin-top: 4px; color: var(--muted); font: 11px Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
-.online { margin-left: auto; color: #4d956f; font: 12px Arial, sans-serif; }
+.workspace {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: linear-gradient(180deg, rgba(9, 17, 27, 0.56), rgba(10, 17, 25, 0.8));
+}
 
-.chat { width: min(850px, 100%); flex: 1; overflow-y: auto; align-self: center; padding: 54px 30px 190px; }
-.message { display: flex; margin-bottom: 25px; animation: rise .35s ease both; }
+.header {
+    height: 96px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 36px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(13, 22, 33, 0.58);
+}
+
+.logo {
+    width: 42px;
+    height: 42px;
+    font: 700 15px/1 "Segoe UI", sans-serif;
+    animation: float 4s ease-in-out infinite;
+}
+
+.title {
+    font: 700 20px/1.2 "Segoe UI", sans-serif;
+    letter-spacing: 0.04em;
+}
+
+.subtitle {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.online {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--cyan);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.settings-button {
+    width: 40px;
+    height: 40px;
+    margin-left: 8px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.04);
+    color: var(--text);
+    font-size: 18px;
+}
+
+.settings-button:hover { border-color: var(--line-strong); background: rgba(103, 214, 255, 0.1); }
+
+.settings-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(1, 6, 12, 0.7);
+    backdrop-filter: blur(10px);
+}
+
+.settings-backdrop.visible { display: flex; }
+
+.settings-panel {
+    width: min(620px, 100%);
+    max-height: min(760px, 90vh);
+    overflow-y: auto;
+    padding: 28px;
+    border: 1px solid var(--line-strong);
+    border-radius: 20px;
+    background: var(--panel-strong);
+    box-shadow: var(--shadow);
+    animation: rise .25s ease both;
+}
+
+.settings-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.settings-heading h2 { margin: 0; font-size: 24px; }
+.settings-heading p { margin: 7px 0 0; color: var(--muted); font-size: 13px; }
+.close-settings { width: 34px; height: 34px; border: 0; border-radius: 10px; background: rgba(255,255,255,.05); color: var(--text); font-size: 22px; }
+.settings-section { padding-top: 24px; margin-top: 22px; border-top: 1px solid var(--line); }
+.settings-section h3 { margin: 0 0 14px; font-size: 13px; color: var(--cyan); letter-spacing: .1em; text-transform: uppercase; }
+.setting-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: 13px 0; color: var(--text); font-size: 14px; }
+.setting-row small { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+.setting-control, .setting-row select { min-width: 170px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: rgba(8, 16, 25, .8); color: var(--text); outline: none; }
+.setting-row input[type="range"] { width: 170px; accent-color: var(--blue); }
+.setting-row input[type="checkbox"] { width: 19px; height: 19px; accent-color: var(--blue-strong); }
+.danger-button { padding: 10px 14px; border: 1px solid rgba(255, 154, 107, .35); border-radius: 10px; background: rgba(255, 154, 107, .08); color: var(--orange); }
+.device-note { margin: -4px 0 14px; color: var(--muted); font-size: 12px; }
+.device-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.device-actions button { min-height: 42px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.04); color: var(--text); text-align: left; font-size: 13px; }
+.device-actions button:hover { border-color: var(--line-strong); background: rgba(103, 214, 255, .1); }
+.robot-panel { margin-top: 24px; padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.035); }
+.robot-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.robot-heading strong { font-size: 14px; }
+.robot-status { color: var(--muted); font-size: 11px; }
+.robot-status.connected { color: var(--cyan); }
+.robot-status.offline { color: #ff9a8d; }
+.robot-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; max-width: 190px; margin: auto; }
+.robot-pad button { min-height: 40px; border: 1px solid var(--line); border-radius: 10px; background: rgba(103,214,255,.06); color: var(--text); font-size: 18px; }
+.robot-pad button:hover { border-color: var(--blue); background: rgba(103,214,255,.16); }
+.robot-pad .stop { color: #ffb39f; background: rgba(255,154,107,.08); }
+
+body.theme-light {
+    --bg-900: #edf5f7;
+    --bg-800: #f6fbfc;
+    --bg-700: #e4eef1;
+    --panel: rgba(255, 255, 255, .82);
+    --panel-strong: rgba(255, 255, 255, .98);
+    --panel-soft: rgba(235, 245, 247, .9);
+    --line: rgba(37, 67, 80, .16);
+    --line-strong: rgba(37, 111, 139, .35);
+    --text: #15303b;
+    --muted: #607985;
+}
+
+body.message-compact .bubble { padding: 11px 14px; border-radius: 11px; font-size: 14px; line-height: 1.55; }
+body.message-compact .message { margin-bottom: 12px; }
+body.message-formal .bubble { border-radius: 8px; line-height: 1.8; }
+
+.online::before {
+    content: "";
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #60f2b0;
+    box-shadow: 0 0 18px rgba(96, 242, 176, 0.9);
+}
+
+.chat {
+    width: min(910px, 100%);
+    flex: 1;
+    overflow-y: auto;
+    align-self: center;
+    padding: 42px 28px 180px;
+}
+
+.message {
+    display: flex;
+    margin-bottom: 22px;
+    animation: rise .35s ease both;
+}
+
 .message.ai { justify-content: flex-start; }
 .message.user { justify-content: flex-end; }
-.avatar { width: 32px; height: 32px; min-width: 32px; margin: 3px 11px 0 0; display: grid; place-items: center; border-radius: 10px; color: var(--coral-dark); background: var(--mint); font: bold 12px Arial, sans-serif; }
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    margin: 2px 12px 0 0;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(103, 214, 255, 0.28), rgba(144, 135, 255, 0.28));
+    border: 1px solid rgba(103, 214, 255, 0.2);
+    font-size: 16px;
+}
+
 .user .avatar { display: none; }
-.bubble { max-width: min(680px, 82%); padding: 16px 19px; border-radius: 17px; font: 16px/1.65 Georgia, "Times New Roman", serif; white-space: pre-wrap; }
-.ai .bubble { background: #293238; border: 1px solid #38434a; border-top-left-radius: 5px; }
-.user .bubble { color: white; background: var(--coral); border-top-right-radius: 5px; box-shadow: 0 8px 20px rgba(232, 116, 97, .18); }
 
-.welcome { max-width: 620px; margin: 22px auto 44px; text-align: center; animation: rise .55s ease both; }
-.big-logo { width: 70px; height: 70px; margin: 0 auto 22px; border-radius: 22px; font: bold 25px Arial, sans-serif; animation: logoFloat 3.6s ease-in-out infinite; }
-.welcome h1 { margin: 0; font: bold 38px/1.1 Georgia, "Times New Roman", serif; letter-spacing: 0; }
-.welcome p { margin: 16px auto 0; max-width: 510px; color: var(--muted); font: 16px/1.65 Arial, sans-serif; }
-.suggestions { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px; padding: 5px 0 15px; }
-.suggestion { padding: 10px 14px; border: 1px solid var(--line); border-radius: 999px; color: #b7c0c1; background: #252e33; font: 13px Arial, sans-serif; cursor: pointer; }
-.suggestion:hover { color: var(--coral-dark); border-color: #e8b1a6; background: #fff7f4; }
+.bubble {
+    max-width: min(700px, 82%);
+    padding: 16px 18px;
+    border-radius: 18px;
+    font: 15px/1.7 "Segoe UI", sans-serif;
+    white-space: pre-wrap;
+    box-shadow: 0 14px 28px rgba(2, 10, 18, 0.18);
+}
 
-.input-area { position: fixed; z-index: 5; bottom: 0; left: calc(50% + 125px); transform: translateX(-50%); width: min(850px, calc(100% - 290px)); padding: 20px 0 25px; background: linear-gradient(transparent, rgba(255, 253, 249, .96) 28%); }
-.input-box { display: flex; align-items: center; padding: 8px; border: 1px solid #3b474e; border-radius: 19px; background: rgba(37, 46, 51, .97); box-shadow: 0 12px 30px rgba(0, 0, 0, .24); }
-.image-preview { display: none; align-items: center; gap: 10px; padding: 0 12px 8px; color: var(--muted); font: 12px Arial, sans-serif; }
-.image-preview img { width: 52px; height: 52px; object-fit: cover; border-radius: 10px; }
-.image-generator { display: none; gap: 8px; padding: 0 0 10px; }
+.ai .bubble {
+    background: rgba(17, 27, 38, 0.92);
+    border: 1px solid var(--line);
+    border-top-left-radius: 8px;
+    color: var(--text);
+}
+
+.user .bubble {
+    background: linear-gradient(135deg, var(--blue-strong), var(--purple));
+    border-top-right-radius: 8px;
+    color: #eef8ff;
+}
+
+.welcome {
+    max-width: 660px;
+    margin: 24px auto 22px;
+    text-align: center;
+    animation: rise .5s ease both;
+}
+
+.big-logo {
+    width: 86px;
+    height: 86px;
+    margin: 0 auto 22px;
+    border-radius: 28px;
+    font: 700 30px/1 "Segoe UI", sans-serif;
+    animation: float 4s ease-in-out infinite;
+}
+
+.welcome h1 {
+    margin: 0;
+    font-size: clamp(34px, 4vw, 52px);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+}
+
+.welcome p {
+    margin: 18px auto 0;
+    max-width: 540px;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.8;
+}
+
+.suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 8px 0 18px;
+}
+
+.suggestion {
+    padding: 10px 16px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(18, 28, 40, 0.8);
+    color: #dfeaf7;
+    font-size: 13px;
+    transition: all .2s ease;
+}
+
+.suggestion:hover {
+    border-color: rgba(103, 214, 255, 0.5);
+    background: rgba(103, 214, 255, 0.08);
+    transform: translateY(-1px);
+}
+
+.input-area {
+    position: fixed;
+    bottom: 0;
+    left: calc(50% + 140px);
+    transform: translateX(-50%);
+    width: min(910px, calc(100% - 300px));
+    padding: 18px 0 22px;
+    background: linear-gradient(180deg, rgba(7, 17, 28, 0), rgba(7, 17, 28, 0.96) 28%, rgba(7, 17, 28, 0.98));
+}
+
+.input-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px 8px 12px;
+    border: 1px solid rgba(154, 188, 223, 0.22);
+    border-radius: 22px;
+    background: rgba(18, 28, 40, 0.92);
+    box-shadow: 0 18px 36px rgba(1, 8, 18, 0.42);
+}
+
+.image-preview {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    padding: 0 8px 10px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.image-preview img {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+}
+
+.image-generator {
+    display: none;
+    gap: 8px;
+    padding: 0 0 10px;
+}
+
 .image-generator.visible { display: flex; }
-.image-generator input { flex: 1; min-width: 0; padding: 11px 13px; border: 1px solid var(--line); border-radius: 12px; outline: none; color: var(--ink); background: #252e33; }
-.generate-button { padding: 0 15px; border: 0; border-radius: 12px; color: white; background: #4d956f; cursor: pointer; }
-.image-button { width: 38px; height: 38px; border: 0; border-radius: 11px; color: #788286; background: transparent; font-size: 18px; cursor: pointer; }
-.image-button:hover { color: var(--coral-dark); background: #fff0ec; }
-.voice-button.listening { color: white; background: var(--coral); animation: pulse 1.2s infinite; }
-.voice-output.active { color: #3b7457; background: var(--mint); }
-.remove-image { color: var(--coral-dark); }
-.speak-message, .copy-message { margin-top: 8px; padding: 0; border: 0; color: #9aa2a1; background: transparent; font-size: 15px; cursor: pointer; }
-.copy-message { margin-left: 12px; }
-.speak-message:hover, .copy-message:hover { color: var(--coral-dark); }
-.input-box input { flex: 1; min-width: 0; padding: 13px; border: 0; outline: none; color: var(--ink); background: transparent; font: 15px Arial, sans-serif; }
-.input-box input::placeholder { color: #a0a6a6; }
-.send { width: 43px; height: 43px; border: 0; border-radius: 14px; color: white; background: var(--coral); font-size: 19px; cursor: pointer; }
-.send:hover { background: var(--coral-dark); box-shadow: 0 7px 16px rgba(57, 139, 255, .25); }
-.typing { display: none; margin: 0 0 15px 43px; color: var(--muted); font: 13px Arial, sans-serif; }
+
+.image-generator input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: rgba(15, 24, 35, 0.85);
+    color: var(--text);
+    outline: none;
+}
+
+.generate-button {
+    padding: 0 16px;
+    height: 42px;
+    border: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #4cd0c8, #67d6ff);
+    color: #06131d;
+    font-weight: 700;
+}
+
+.image-button {
+    width: 38px;
+    height: 38px;
+    border: 0;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    color: #b5c8da;
+    font-size: 18px;
+}
+
+.image-button:hover {
+    background: rgba(103, 214, 255, 0.12);
+    color: var(--text);
+}
+
+.voice-button.listening {
+    color: #06131d;
+    background: linear-gradient(135deg, var(--orange), #ffb784);
+    animation: pulse 1.3s infinite;
+}
+
+.voice-output.active {
+    color: #06131d;
+    background: linear-gradient(135deg, var(--cyan), var(--blue));
+}
+
+.remove-image { color: var(--orange); }
+
+.speak-message, .copy-message {
+    margin-top: 8px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #9bb0c6;
+    font-size: 15px;
+}
+
+.copy-message { margin-left: 10px; }
+.speak-message:hover, .copy-message:hover { color: var(--blue); }
+
+.input-box input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 8px;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 15px;
+}
+
+.input-box input::placeholder { color: #8aa1b7; }
+
+.send {
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #67d6ff, #3ea5ff);
+    color: #06131d;
+    font-size: 20px;
+    font-weight: 700;
+    box-shadow: 0 12px 24px rgba(62, 165, 255, 0.28);
+}
+
+.send:hover {
+    box-shadow: 0 14px 28px rgba(103, 214, 255, 0.32);
+}
+
+.typing {
+    display: none;
+    margin: 0 0 14px 52px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
 .dots span { animation: blink 1.4s infinite; }
 .dots span:nth-child(2) { animation-delay: .2s; }
 .dots span:nth-child(3) { animation-delay: .4s; }
-@keyframes blink { 0%, 80%, 100% { opacity: .2; } 40% { opacity: 1; } }
-@keyframes pulse { 50% { box-shadow: 0 0 0 8px rgba(232, 116, 97, .16); } }
-@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes logoFloat { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-4px) rotate(2deg); } }
-@keyframes cursor { 50% { opacity: 0; } }
-@keyframes typing { from { width: 0; } to { width: 11ch; } }
+
+@keyframes blink {
+    0%, 80%, 100% { opacity: .3; }
+    40% { opacity: 1; }
+}
+
+@keyframes pulse {
+    50% { box-shadow: 0 0 0 10px rgba(255, 154, 107, 0.16); }
+}
+
+@keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
 
 @media (max-width: 760px) {
     .sidebar { display: none; }
-    .header { height: 72px; padding: 14px 18px; }
-    .chat { padding: 34px 16px 180px; }
-    .welcome h1 { font-size: 30px; }
-    .bubble { max-width: 90%; font-size: 15px; }
-    .input-area { left: 0; transform: none; width: 100%; padding: 14px 12px 18px; }
+    .header {
+        height: 76px;
+        padding: 16px 18px;
+    }
+    .chat {
+        padding: 32px 16px 190px;
+    }
+    .bubble { max-width: 90%; }
+    .welcome p { font-size: 15px; }
+    .input-area {
+        left: 0;
+        transform: none;
+        width: 100%;
+        padding: 12px 12px 18px;
+    }
+    .title { font-size: 18px; }
     .subtitle { display: none; }
-    .online { font-size: 11px; }
-    .image-button { width: 34px; }
+    .online { font-size: 10px; letter-spacing: 0.1em; }
+    .device-actions { grid-template-columns: 1fr; }
+}
+
+/* NOVA-inspired Mimo theme */
+html, body {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #07070d;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: .28;
+    background-image: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: linear-gradient(to bottom, black, transparent 86%);
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    inset: -35%;
+    z-index: -2;
+    pointer-events: none;
+    opacity: .72;
+    background:
+        linear-gradient(118deg, transparent 20%, rgba(128,91,249,.13) 38%, transparent 52%),
+        linear-gradient(300deg, transparent 34%, rgba(70,230,223,.11) 49%, transparent 65%),
+        radial-gradient(ellipse at 18% 12%, rgba(128,91,249,.22), transparent 32%),
+        radial-gradient(ellipse at 82% 74%, rgba(57,203,215,.16), transparent 29%);
+    filter: blur(18px);
+    animation: aurora 18s ease-in-out infinite alternate;
+}
+
+@keyframes aurora {
+    0% { transform: translate3d(-3%, -2%, 0) rotate(-2deg) scale(1); }
+    50% { transform: translate3d(3%, 2%, 0) rotate(2deg) scale(1.06); }
+    100% { transform: translate3d(-1%, 4%, 0) rotate(-1deg) scale(1.02); }
+}
+
+@keyframes shimmer {
+    0%, 100% { opacity: .55; transform: translateX(-8%); }
+    50% { opacity: 1; transform: translateX(8%); }
+}
+
+.app { width: min(1440px, 100%); max-width: none; position: relative; isolation: isolate; background: rgba(7,7,13,.62); box-shadow: 0 28px 90px rgba(0,0,0,.45); }
+.app::before { content: ""; position: absolute; top: 82px; left: 254px; right: 0; height: 1px; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(155,123,255,.7), rgba(70,230,223,.5), transparent); animation: shimmer 7s ease-in-out infinite; }
+.sidebar { width: 254px; flex-basis: 254px; padding: 25px 16px 19px; background: rgba(11,11,20,.82); border-right-color: rgba(255,255,255,.1); }
+.brand { margin: 0 8px 30px; gap: 10px; }
+.brand-mark, .logo, .big-logo { background: conic-gradient(from 210deg, #9b7bff, #46e6df, #fff, #9b7bff); box-shadow: 0 0 24px rgba(117,88,255,.3); }
+.brand-mark { width: 31px; height: 31px; border: 1px solid rgba(255,255,255,.6); border-radius: 9px; color: #11111d; font-size: 13px; }
+.brand-name { font-size: 19px; letter-spacing: -.06em; }
+.new-chat { border-color: rgba(255,255,255,.16); border-radius: 12px; background: linear-gradient(110deg, rgba(128,91,249,.3), rgba(57,203,215,.12)); }
+.side-label { margin-top: 30px; color: #858599; }
+.side-link { border: 1px solid transparent; color: #9696ab; }
+.side-link.active { border-color: rgba(155,123,255,.2); background: linear-gradient(90deg, rgba(135,91,249,.28), rgba(135,91,249,.04)); }
+.google-login, .account { border-color: rgba(255,255,255,.1); background: rgba(255,255,255,.04); }
+.workspace { background: linear-gradient(145deg, rgba(8,8,15,.38), rgba(19,16,34,.28) 48%, rgba(8,8,15,.58)); }
+.header { height: 82px; padding: 16px 34px; background: rgba(7,7,13,.4); border-bottom-color: rgba(255,255,255,.1); }
+.logo { width: 35px; height: 35px; border-radius: 11px; color: #12121d; }
+.title { font-size: 18px; letter-spacing: -.05em; }
+.subtitle { color: #858599; }
+.online { color: #46e6df; font-size: 11px; }
+.chat { width: min(930px, 100%); padding: 54px 32px 190px; }
+.welcome { max-width: 720px; margin: 40px auto 30px; position: relative; }
+.welcome::before { content: "✦  MIMO COMMAND CENTER"; display: inline-flex; align-items: center; min-height: 27px; padding: 0 11px; border: 1px solid rgba(70,230,223,.22); border-radius: 99px; background: rgba(70,230,223,.06); color: #46e6df; font-size: 10px; font-weight: 750; letter-spacing: .12em; }
+.big-logo { width: 74px; height: 74px; margin-bottom: 25px; border-radius: 22px; color: #11111d; }
+.welcome h1 { font-size: clamp(42px, 6vw, 72px); letter-spacing: -.075em; line-height: .98; background: linear-gradient(100deg, #fff 15%, #beaaff 55%, #65f3ea 95%); color: transparent; background-clip: text; -webkit-background-clip: text; }
+.welcome p { max-width: 570px; margin-top: 20px; color: #a4a4b9; font-size: 15px; }
+.suggestion { border-color: rgba(255,255,255,.12); border-radius: 12px; background: rgba(255,255,255,.045); color: #c9c9d8; }
+.suggestion:hover { border-color: rgba(155,123,255,.55); background: rgba(155,123,255,.12); }
+.message { margin-bottom: 18px; }
+.avatar { border-color: rgba(255,255,255,.14); border-radius: 10px; background: linear-gradient(135deg, rgba(155,123,255,.28), rgba(70,230,223,.18)); }
+.bubble { border-radius: 15px; border-color: rgba(255,255,255,.11); box-shadow: 0 15px 35px rgba(0,0,0,.2); font-size: 14px; }
+.ai .bubble { background: rgba(20,20,34,.76); }
+.user .bubble { background: linear-gradient(110deg, #805bf9, #6576fa 54%, #39cbd7); }
+.input-area { left: calc(50% + 127px); width: min(930px, calc(100% - 300px)); background: linear-gradient(180deg, rgba(7,7,13,0), rgba(7,7,13,.95) 34%, #07070d); }
+.input-box { border-color: rgba(255,255,255,.16); border-radius: 17px; background: rgba(20,20,34,.86); box-shadow: 0 20px 45px rgba(0,0,0,.45); }
+.send { border-radius: 12px; background: linear-gradient(110deg, #805bf9, #46e6df); box-shadow: 0 12px 30px rgba(108,93,248,.28); }
+
+.settings-panel, .input-box, .ai .bubble { backdrop-filter: blur(18px); }
+.voice-output.active, .send { animation: edge-pulse 4s ease-in-out infinite; }
+@keyframes edge-pulse { 50% { box-shadow: 0 12px 34px rgba(70,230,223,.28); } }
+
+@media (max-width: 760px) {
+    .header { padding-inline: 18px; }
+    .chat { padding-inline: 16px; }
+    .input-area { left: 0; width: 100%; }
+    .app::before { left: 0; }
+}
 </style>
 </head>
 
@@ -145,8 +707,8 @@ button:active { transform: scale(.96); }
 
     <aside class="sidebar">
         <div class="brand">
-            <div class="brand-mark">IX</div>
-            <div class="brand-name">IndustriesX</div>
+            <div class="brand-mark">M</div>
+            <div class="brand-name">Mimo AI</div>
         </div>
 
         <button class="new-chat" type="button" onclick="startNewChat()">＋ Новый диалог</button>
@@ -155,7 +717,15 @@ button:active { transform: scale(.96); }
         <div class="side-label">Рабочее пространство</div>
         <div class="side-link active">✦ Умный помощник</div>
         <div class="side-link">◌ Мои изображения</div>
-        <div class="side-footer">Создано Азамом<br>Технологии для умного будущего</div>
+        <div class="robot-panel">
+            <div class="robot-heading"><strong>🤖 ESP32-C3</strong><span class="robot-status" id="robotStatus">Проверка...</span></div>
+            <div class="robot-pad" aria-label="Управление роботом">
+                <span></span><button type="button" onclick="sendRobotCommand('forward')" title="Вперёд">↑</button><span></span>
+                <button type="button" onclick="sendRobotCommand('left')" title="Влево">←</button><button class="stop" type="button" onclick="sendRobotCommand('stop')" title="Стоп">■</button><button type="button" onclick="sendRobotCommand('right')" title="Вправо">→</button>
+                <span></span><button type="button" onclick="sendRobotCommand('back')" title="Назад">↓</button><span></span>
+            </div>
+        </div>
+        <div class="side-footer">Создано для идей<br>Технологии, которые ускоряют развитие</div>
     </aside>
 
     <section class="workspace">
@@ -165,22 +735,24 @@ button:active { transform: scale(.96); }
     <header class="header">
 
         <div class="logo">
-            IX
+            M
         </div>
 
         <div>
             <div class="title">
-                IndustriesX
+                Mimo AI
             </div>
 
             <div class="subtitle">
-                AI ASSISTANT • SMART TECHNOLOGY
+                AI ASSISTANT • SMART WORKFLOW
             </div>
         </div>
 
         <div class="online">
-            ● ONLINE
+            Online
         </div>
+
+        <button class="settings-button" type="button" onclick="toggleSettings(true)" title="Открыть настройки">⚙</button>
 
     </header>
 
@@ -192,7 +764,7 @@ button:active { transform: scale(.96); }
         <div class="welcome" id="welcome">
 
             <div class="big-logo">
-                IX
+                M
             </div>
 
             <h1>
@@ -200,10 +772,10 @@ button:active { transform: scale(.96); }
             </h1>
 
             <p>
-                Я AI-помощник IndustriesX.
+                Я умный AI-ассистент Mimo.
                 <br>
-                Помогаю Азаму с роботами, технологиями,
-                идеями и созданием новых проектов.
+                Помогаю с идеями, проектами, робототехникой,
+                технологиями и быстрыми решениями в работе.
             </p>
 
         </div>
@@ -290,6 +862,50 @@ button:active { transform: scale(.96); }
 
 </div>
 
+<div class="settings-backdrop" id="settingsBackdrop" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" onclick="closeSettingsOnBackdrop(event)">
+    <section class="settings-panel">
+        <div class="settings-heading">
+            <div>
+                <h2 id="settingsTitle">Настройки Mimo</h2>
+                <p>Персонализируй ответы, внешний вид и голос.</p>
+            </div>
+            <button class="close-settings" type="button" onclick="toggleSettings(false)" title="Закрыть настройки">×</button>
+        </div>
+
+        <div class="settings-section">
+            <h3>Внешний вид</h3>
+            <label class="setting-row"><span>Тема<small>Сохраняется на этом устройстве</small></span><select id="themeSetting"><option value="dark">Темная</option><option value="light">Светлая</option></select></label>
+            <label class="setting-row"><span>Стиль сообщений<small>Меняет плотность и подачу чата</small></span><select id="messageStyleSetting"><option value="default">Стандартный</option><option value="compact">Компактный</option><option value="formal">Строгий</option></select></label>
+        </div>
+
+        <div class="settings-section">
+            <h3>Ответы и голос</h3>
+            <label class="setting-row"><span>Голос для ответов</span><select id="voiceSetting"><option value="auto">Автоматически</option></select></label>
+            <label class="setting-row"><span>Скорость речи</span><input id="voiceRateSetting" type="range" min="0.6" max="1.5" step="0.1" value="1"><output id="voiceRateValue">1.0x</output></label>
+            <label class="setting-row"><span>Озвучивать ответы автоматически</span><input id="autoVoiceSetting" type="checkbox" checked></label>
+        </div>
+
+        <div class="settings-section">
+            <h3>Чат</h3>
+            <label class="setting-row"><span>Отправка по Enter<small>Shift+Enter оставляет перенос строки</small></span><input id="enterSetting" type="checkbox" checked></label>
+            <label class="setting-row"><span>История диалогов</span><button class="danger-button" type="button" onclick="clearChatHistory()">Очистить историю</button></label>
+        </div>
+
+        <div class="settings-section">
+            <h3>Управление ноутбуком</h3>
+            <p class="device-note">Действия выполняются только на этом компьютере и требуют подтверждения.</p>
+            <div class="device-actions">
+                <button type="button" onclick="requestDeviceAction('battery')">🔋 Заряд батареи</button>
+                <button type="button" onclick="requestDeviceAction('screenshot')">▣ Скриншот</button>
+                <button type="button" onclick="requestDeviceAction('mute')">🔇 Выключить звук</button>
+                <button type="button" onclick="requestDeviceAction('music')">▶ Запустить музыку</button>
+                <button type="button" onclick="requestDeviceAction('folder')">📁 Открыть папку</button>
+                <button type="button" onclick="requestDeviceAction('browser')">🌐 Открыть браузер</button>
+            </div>
+        </div>
+    </section>
+</div>
+
 <script src="https://accounts.google.com/gsi/client" async defer onload="setupGoogleLogin()"></script>
 
 
@@ -340,11 +956,131 @@ document.getElementById("googleLogin");
 const account =
 document.getElementById("account");
 
+const settingsBackdrop = document.getElementById("settingsBackdrop");
+const themeSetting = document.getElementById("themeSetting");
+const messageStyleSetting = document.getElementById("messageStyleSetting");
+const voiceSetting = document.getElementById("voiceSetting");
+const voiceRateSetting = document.getElementById("voiceRateSetting");
+const voiceRateValue = document.getElementById("voiceRateValue");
+const autoVoiceSetting = document.getElementById("autoVoiceSetting");
+const enterSetting = document.getElementById("enterSetting");
+const robotStatus = document.getElementById("robotStatus");
+
 let selectedImage = null;
 let recognition = null;
 let voiceOutputEnabled = true;
 let restoringHistory = false;
 const historyKey = "industriesx-chat-history";
+const settingsKey = "mimo-chat-settings";
+let settings = Object.assign({ theme: "dark", messageStyle: "default", voice: "auto", rate: 1, autoVoice: true, enterToSend: true }, JSON.parse(localStorage.getItem(settingsKey) || "{}"));
+
+async function sendRobotCommand(command) {
+    try {
+        const response = await fetch("/api/robot-command", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ command })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Команда не выполнена.");
+        setRobotStatus(true, "Подключён");
+    } catch (error) {
+        setRobotStatus(false, "Недоступен");
+        addMessage(error.message, "ai");
+    }
+}
+
+async function checkRobotStatus() {
+    try {
+        const response = await fetch("/api/robot-status");
+        const data = await response.json();
+        setRobotStatus(data.connected, data.connected ? "Подключён" : "Недоступен");
+    } catch {
+        setRobotStatus(false, "Недоступен");
+    }
+}
+
+function setRobotStatus(connected, label) {
+    robotStatus.textContent = (connected ? "🟢 " : "🔴 ") + label;
+    robotStatus.classList.toggle("connected", connected);
+    robotStatus.classList.toggle("offline", !connected);
+}
+
+function applySettings() {
+    document.body.classList.toggle("theme-light", settings.theme === "light");
+    document.body.classList.toggle("message-compact", settings.messageStyle === "compact");
+    document.body.classList.toggle("message-formal", settings.messageStyle === "formal");
+    themeSetting.value = settings.theme;
+    messageStyleSetting.value = settings.messageStyle;
+    voiceSetting.value = settings.voice;
+    voiceRateSetting.value = settings.rate;
+    voiceRateValue.value = Number(settings.rate).toFixed(1) + "x";
+    autoVoiceSetting.checked = settings.autoVoice;
+    enterSetting.checked = settings.enterToSend;
+}
+
+function saveSettings() {
+    settings = { theme: themeSetting.value, messageStyle: messageStyleSetting.value, voice: voiceSetting.value, rate: Number(voiceRateSetting.value), autoVoice: autoVoiceSetting.checked, enterToSend: enterSetting.checked };
+    localStorage.setItem(settingsKey, JSON.stringify(settings));
+    applySettings();
+}
+
+function toggleSettings(visible) {
+    settingsBackdrop.classList.toggle("visible", visible);
+    if (visible) {
+        populateVoices();
+        themeSetting.focus();
+    }
+}
+
+function closeSettingsOnBackdrop(event) {
+    if (event.target === settingsBackdrop) toggleSettings(false);
+}
+
+function clearChatHistory() {
+    localStorage.removeItem(historyKey);
+    resetChatUI();
+    toggleSettings(false);
+}
+
+async function requestDeviceAction(action) {
+    const labels = { battery: "проверить заряд батареи", screenshot: "сделать скриншот", mute: "выключить звук", music: "запустить музыку", folder: "открыть папку проекта", browser: "открыть браузер" };
+    if (!window.confirm("Разрешить Mimo: " + labels[action] + "?")) return;
+    try {
+        const response = await fetch("/api/device-action", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action }) });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Действие не выполнено");
+        addMessage(data.message, "ai");
+    } catch (error) {
+        addMessage(error.message, "ai");
+    }
+}
+
+function detectDeviceAction(text) {
+    const command = text.toLowerCase();
+    if (/скриншот|снимок экрана/.test(command)) return "screenshot";
+    if (/заряд|батаре/.test(command)) return "battery";
+    if (/выключи звук|выключить звук|без звука|заглуши/.test(command)) return "mute";
+    if (/запусти музыку|включи музыку|открой музыку/.test(command)) return "music";
+    if (/открой папку|открыть папку/.test(command)) return "folder";
+    if (/открой браузер|открыть браузер/.test(command)) return "browser";
+    return "";
+}
+
+function populateVoices() {
+    if (!("speechSynthesis" in window)) return;
+    const current = settings.voice;
+    const voices = window.speechSynthesis.getVoices().filter(function(voice) { return voice.lang.toLowerCase().startsWith("ru"); });
+    voiceSetting.innerHTML = "<option value=\"auto\">Автоматически</option>";
+    voices.forEach(function(voice) {
+        const option = document.createElement("option");
+        option.value = voice.name;
+        option.textContent = voice.name;
+        voiceSetting.appendChild(option);
+    });
+    voiceSetting.value = current;
+    if (voiceSetting.value !== current) voiceSetting.value = "auto";
+}
 
 async function setupGoogleLogin() {
     const config = await fetch("/api/config").then(function(response) {
@@ -535,9 +1271,22 @@ function restoreHistory() {
     restoringHistory = false;
 }
 
+function resetChatUI() {
+    const existingMessages = chat.querySelectorAll(".message");
+    existingMessages.forEach(function(message) {
+        message.remove();
+    });
+
+    welcome.style.display = "block";
+    suggestions.style.display = "flex";
+    typing.style.display = "none";
+    input.value = "";
+    clearImage();
+}
+
 function startNewChat() {
     localStorage.removeItem(historyKey);
-    window.location.reload();
+    resetChatUI();
 }
 
 
@@ -551,6 +1300,15 @@ async function sendMessage() {
 
     if (!text && !selectedImage) {
         return;
+    }
+
+    if (!selectedImage) {
+        const deviceAction = detectDeviceAction(text);
+        if (deviceAction) {
+            input.value = "";
+            await requestDeviceAction(deviceAction);
+            return;
+        }
     }
 
     const image = selectedImage;
@@ -595,6 +1353,7 @@ async function sendMessage() {
 
             body: JSON.stringify({
                 message: text,
+                style: settings.messageStyle,
                 image: image ? {
                     mimeType: image.mimeType,
                     data: image.data
@@ -744,21 +1503,19 @@ function toggleVoiceOutput() {
 }
 
 function speakText(text) {
-    if (!voiceOutputEnabled || !("speechSynthesis" in window)) {
+    if (!voiceOutputEnabled || !settings.autoVoice || !("speechSynthesis" in window)) {
         return;
     }
 
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "ru-RU";
-    utterance.rate = 1;
+    utterance.rate = Number(settings.rate);
     utterance.pitch = 1;
 
-    const russianVoice = window.speechSynthesis
-        .getVoices()
-        .find(function(voice) {
-            return voice.lang.toLowerCase().startsWith("ru");
-        });
+    const russianVoice = window.speechSynthesis.getVoices().find(function(voice) {
+        return settings.voice === "auto" ? voice.lang.toLowerCase().startsWith("ru") : voice.name === settings.voice;
+    });
 
     if (russianVoice) {
         utterance.voice = russianVoice;
@@ -810,10 +1567,9 @@ input.addEventListener(
     "keydown",
     function(event) {
 
-        if (
-            event.key === "Enter"
-        ) {
+        if (event.key === "Enter" && settings.enterToSend && !event.shiftKey) {
 
+            event.preventDefault();
             sendMessage();
 
         }
@@ -822,6 +1578,17 @@ input.addEventListener(
 );
 
 restoreHistory();
+applySettings();
+themeSetting.addEventListener("change", saveSettings);
+messageStyleSetting.addEventListener("change", saveSettings);
+voiceSetting.addEventListener("change", saveSettings);
+voiceRateSetting.addEventListener("input", saveSettings);
+autoVoiceSetting.addEventListener("change", saveSettings);
+enterSetting.addEventListener("change", saveSettings);
+if ("speechSynthesis" in window) window.speechSynthesis.onvoiceschanged = populateVoices;
+document.addEventListener("keydown", function(event) {
+    if (event.key === "Escape") toggleSettings(false);
+});
 
 </script>
 
