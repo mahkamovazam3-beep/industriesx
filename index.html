@@ -1656,6 +1656,16 @@ document.addEventListener("keydown", function(event) {
     }
 });
 
+document.addEventListener("keyup", function(event) {
+    if (robotKeyIsActive()) return;
+
+    const movementKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "W", "a", "A", "s", "S", "d", "D"];
+    if (movementKeys.includes(event.key)) {
+        event.preventDefault();
+        sendRobotCommand("stop");
+    }
+});
+
 bindRobotControls();
 checkRobotStatus();
 
