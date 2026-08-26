@@ -283,6 +283,8 @@ button:active { transform: scale(.98); }
 .robot-pad button { min-height: 40px; border: 1px solid var(--line); border-radius: 10px; background: rgba(103,214,255,.06); color: var(--text); font-size: 18px; }
 .robot-pad button:hover { border-color: var(--blue); background: rgba(103,214,255,.16); }
 .robot-pad .stop { color: #ffb39f; background: rgba(255,154,107,.08); }
+.robot-pad button.pressed { transform: scale(.94); border-color: var(--cyan); background: rgba(103,214,255,.22); box-shadow: 0 0 18px rgba(103,214,255,.22); }
+.robot-feedback { min-height: 16px; margin-top: 10px; color: var(--muted); font-size: 11px; text-align: center; }
 
 body.theme-light {
     --bg-900: #edf5f7;
@@ -718,12 +720,13 @@ body::after {
         <div class="side-link active">✦ Умный помощник</div>
         <div class="side-link">◌ Мои изображения</div>
         <div class="robot-panel">
-            <div class="robot-heading"><strong>🤖 ESP32-C3</strong><span class="robot-status" id="robotStatus">Проверка...</span></div>
+            <div class="robot-heading"><strong>🤖 Управление роботом</strong><span class="robot-status" id="robotStatus">Проверка...</span></div>
             <div class="robot-pad" aria-label="Управление роботом">
-                <span></span><button type="button" onclick="sendRobotCommand('forward')" title="Вперёд">↑</button><span></span>
-                <button type="button" onclick="sendRobotCommand('left')" title="Влево">←</button><button class="stop" type="button" onclick="sendRobotCommand('stop')" title="Стоп">■</button><button type="button" onclick="sendRobotCommand('right')" title="Вправо">→</button>
-                <span></span><button type="button" onclick="sendRobotCommand('back')" title="Назад">↓</button><span></span>
+                <span></span><button type="button" data-robot-command="forward" title="Вперёд">⬆️</button><span></span>
+                <button type="button" data-robot-command="left" title="Влево">⬅️</button><button class="stop" type="button" data-robot-command="stop" title="Стоп">⏹️</button><button type="button" data-robot-command="right" title="Вправо">➡️</button>
+                <span></span><button type="button" data-robot-command="back" title="Назад">⬇️</button><span></span>
             </div>
+            <div class="robot-feedback" id="robotFeedback" aria-live="polite"></div>
         </div>
         <div class="side-footer">Создано для идей<br>Технологии, которые ускоряют развитие</div>
     </aside>
@@ -965,6 +968,8 @@ const voiceRateValue = document.getElementById("voiceRateValue");
 const autoVoiceSetting = document.getElementById("autoVoiceSetting");
 const enterSetting = document.getElementById("enterSetting");
 const robotStatus = document.getElementById("robotStatus");
+const robotFeedback = document.getElementById("robotFeedback");
+const robotButtons = document.querySelectorAll("[data-robot-command]");
 
 let selectedImage = null;
 let recognition = null;
@@ -974,7 +979,12 @@ const historyKey = "industriesx-chat-history";
 const settingsKey = "mimo-chat-settings";
 let settings = Object.assign({ theme: "dark", messageStyle: "default", voice: "auto", rate: 1, autoVoice: true, enterToSend: true }, JSON.parse(localStorage.getItem(settingsKey) || "{}"));
 
+let robotCommandInProgress = false;
+
 async function sendRobotCommand(command) {
+    if (robotCommandInProgress && command !== "stop") return;
+    robotCommandInProgress = command !== "stop";
+
     try {
         const response = await fetch("/api/robot-command", {
             method: "POST",
@@ -984,10 +994,42 @@ async function sendRobotCommand(command) {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "Команда не выполнена.");
         setRobotStatus(true, "Подключён");
+        robotFeedback.textContent = command === "stop" ? "Робот остановлен." : "Команда отправлена: " + command;
     } catch (error) {
         setRobotStatus(false, "Недоступен");
-        addMessage(error.message, "ai");
+        robotFeedback.textContent = error.message;
+    } finally {
+        if (command === "stop") robotCommandInProgress = false;
     }
+}
+
+function setRobotStatus(connected, label) {
+    robotStatus.textContent = (connected ? "🟢 " : "🔴 ") + label;
+    robotStatus.classList.toggle("connected", connected);
+    robotStatus.classList.toggle("offline", !connected);
+}
+
+function robotKeyIsActive() {
+    const element = document.activeElement;
+    return element && ["INPUT", "TEXTAREA", "SELECT"].includes(element.tagName);
+}
+
+function bindRobotControls() {
+    robotButtons.forEach(function(button) {
+        const start = function(event) {
+            event.preventDefault();
+            button.classList.add("pressed");
+            sendRobotCommand(button.dataset.robotCommand);
+        };
+        const stop = function() {
+            button.classList.remove("pressed");
+            if (button.dataset.robotCommand !== "stop") sendRobotCommand("stop");
+        };
+        button.addEventListener("pointerdown", start);
+        button.addEventListener("pointerup", stop);
+        button.addEventListener("pointercancel", stop);
+        button.addEventListener("pointerleave", stop);
+    });
 }
 
 async function checkRobotStatus() {
@@ -1588,7 +1630,34 @@ enterSetting.addEventListener("change", saveSettings);
 if ("speechSynthesis" in window) window.speechSynthesis.onvoiceschanged = populateVoices;
 document.addEventListener("keydown", function(event) {
     if (event.key === "Escape") toggleSettings(false);
+
+    if (robotKeyIsActive()) return;
+
+    const commands = {
+        ArrowUp: "forward",
+        w: "forward",
+        W: "forward",
+        ArrowDown: "back",
+        s: "back",
+        S: "back",
+        ArrowLeft: "left",
+        a: "left",
+        A: "left",
+        ArrowRight: "right",
+        d: "right",
+        D: "right",
+        " ": "stop"
+    };
+
+    const command = commands[event.key];
+    if (command) {
+        event.preventDefault();
+        sendRobotCommand(command);
+    }
 });
+
+bindRobotControls();
+checkRobotStatus();
 
 </script>
 
