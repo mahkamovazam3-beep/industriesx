@@ -1412,6 +1412,11 @@ async function sendMessage() {
             throw new Error(data.error || "Ошибка сервера");
         }
 
+        if (data.robot) {
+            setRobotStatus(true, "Подключён");
+            robotFeedback.textContent = data.reply;
+        }
+
 
         addMessage(
             data.reply,

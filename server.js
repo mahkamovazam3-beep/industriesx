@@ -6,6 +6,7 @@ const { execFile } = require("child_process");
 const path = require("path");
 require("dotenv").config({ override: true });
 const ESP32_IP = process.env.ESP32_IP || "";
+let robotStopTimer = null;
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -80,6 +81,17 @@ app.post("/api/chat", async (req, res) => {
             });
         }
 
+        if (!image) {
+            const robotIntent = parseRobotIntent(rawMessage);
+            if (robotIntent) {
+                const robotResult = await executeRobotCommand(robotIntent.command, robotIntent.duration);
+                return res.json({
+                    reply: robotResult.message,
+                    robot: robotResult
+                });
+            }
+        }
+
         const message = (rawMessage || "Опиши это изображение.") + "\n\n" + (styleInstructions[req.body.style] || styleInstructions.default);
 
         const content = image
@@ -107,6 +119,10 @@ app.post("/api/chat", async (req, res) => {
             return res.status(429).json({
                 error: "Бесплатный лимит Gemini закончился. Попробуй позже."
             });
+        }
+
+        if (error.status === 503) {
+            return res.status(503).json({ error: error.message });
         }
 
         res.status(500).json({
@@ -227,6 +243,7 @@ app.post("/api/device-action", (req, res) => {
 app.post("/api/robot-command", async (req, res) => {
     try {
         const command = req.body.command;
+        const duration = Number(req.body.duration) || 0;
 
         const allowedCommands = [
             "forward",
@@ -242,33 +259,14 @@ app.post("/api/robot-command", async (req, res) => {
             });
         }
 
-        if (!ESP32_IP) {
-            return res.status(503).json({
-                error: "ESP32_IP не указан в .env."
-            });
-        }
-
-        let baseUrl;
-        try {
-            baseUrl = new URL(ESP32_IP);
-            if (!['http:', 'https:'].includes(baseUrl.protocol)) throw new Error();
-        } catch {
-            return res.status(500).json({ error: "ESP32_IP имеет неверный формат." });
-        }
-
-        const url = new URL(command, `${baseUrl.toString().replace(/\/$/, "")}/`).toString();
-        const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
-
-        if (!response.ok) {
-            throw new Error(`ESP32 ответил: ${response.status}`);
-        }
-
-        const result = await response.text();
+        const result = await executeRobotCommand(command, duration);
 
         res.json({
-            success: true,
+            success: result.success,
             command: command,
-            esp32: result
+            duration: result.duration,
+            esp32: result.esp32,
+            message: result.message
         });
 
     } catch (error) {
@@ -295,3 +293,76 @@ app.get("/api/robot-status", async (req, res) => {
         res.json({ connected: false, error: error.message });
     }
 });
+
+function parseRobotIntent(text) {
+    const normalized = text.toLowerCase().replace(/ё/g, "е");
+    const isCommand = /(езжаи|поезжаи|двигаися|двигаться|ходи|команду|робот|машин)/.test(normalized);
+    if (!isCommand) return null;
+
+    const directions = [
+        { words: ["вперед", "вперёд"], command: "forward" },
+        { words: ["назад"], command: "back" },
+        { words: ["влево"], command: "left" },
+        { words: ["вправо"], command: "right" },
+        { words: ["стоп", "остановись", "останови"], command: "stop" }
+    ];
+    const direction = directions.find(item => item.words.some(word => normalized.includes(word)));
+    if (!direction) return null;
+
+    const durationMatch = normalized.match(/(\d+(?:[.,]\d+)?)\s*(секунд|секунды|секунду|с)/);
+    const duration = durationMatch ? Math.min(Math.max(Number(durationMatch[1].replace(",", ".")), 0.2), 30) : 0;
+    return { command: direction.command, duration };
+}
+
+async function executeRobotCommand(command, duration = 0) {
+    if (!ESP32_IP) {
+        const error = new Error("ESP32_IP не указан в .env.");
+        error.status = 503;
+        throw error;
+    }
+
+    let baseUrl;
+    try {
+        baseUrl = new URL(ESP32_IP);
+        if (!['http:', 'https:'].includes(baseUrl.protocol)) throw new Error();
+    } catch {
+        const error = new Error("ESP32_IP имеет неверный формат.");
+        error.status = 500;
+        throw error;
+    }
+
+    if (robotStopTimer) {
+        clearTimeout(robotStopTimer);
+        robotStopTimer = null;
+    }
+
+    const url = new URL(command, `${baseUrl.toString().replace(/\/$/, "")}/`).toString();
+    const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    if (!response.ok) throw new Error(`ESP32 ответил: ${response.status}`);
+    const esp32 = await response.text();
+
+    if (command !== "stop" && duration > 0) {
+        robotStopTimer = setTimeout(async () => {
+            try {
+                const stopUrl = new URL("stop", `${baseUrl.toString().replace(/\/$/, "")}/`).toString();
+                await fetch(stopUrl, { signal: AbortSignal.timeout(5000) });
+            } catch (error) {
+                console.error("Не удалось автоматически остановить ESP32:", error.message);
+            } finally {
+                robotStopTimer = null;
+            }
+        }, duration * 1000);
+    }
+
+    return {
+        success: true,
+        command,
+        duration,
+        esp32,
+        message: command === "stop"
+            ? "Робот остановлен. ⏹️"
+            : duration > 0
+                ? `Робот едет ${duration} сек. и остановится автоматически. 🤖`
+                : "Команда роботу отправлена. 🤖"
+    };
+}
