@@ -84,11 +84,18 @@ app.post("/api/chat", async (req, res) => {
         if (!image) {
             const robotIntent = parseRobotIntent(rawMessage);
             if (robotIntent) {
-                const robotResult = await executeRobotCommand(robotIntent.command, robotIntent.duration);
-                return res.json({
-                    reply: robotResult.message,
-                    robot: robotResult
-                });
+                try {
+                    const robotResult = await executeRobotCommand(robotIntent.command, robotIntent.duration);
+                    return res.json({
+                        reply: robotResult.message,
+                        robot: robotResult
+                    });
+                } catch (error) {
+                    console.error("Ошибка команды роботу:", error.message);
+                    return res.status(error.status || 503).json({
+                        error: "ESP32 недоступна. Проверь подключение робота к Wi-Fi."
+                    });
+                }
             }
         }
 
@@ -123,6 +130,12 @@ app.post("/api/chat", async (req, res) => {
 
         if (error.status === 503) {
             return res.status(503).json({ error: error.message });
+        }
+
+        if (error instanceof TypeError && error.message === "fetch failed") {
+            return res.status(503).json({
+                error: "Gemini недоступен по сети. Проверь подключение к интернету."
+            });
         }
 
         res.status(500).json({
@@ -273,7 +286,7 @@ app.post("/api/robot-command", async (req, res) => {
         console.error("Ошибка связи с ESP32:", error.message);
 
         res.status(503).json({
-            error: "Не удалось связаться с ESP32.",
+            error: "ESP32 недоступна. Подключи ноутбук к Wi-Fi робота или укажи IP робота из домашней сети в .env.",
             details: error.message
         });
     }
@@ -296,7 +309,7 @@ app.get("/api/robot-status", async (req, res) => {
 
 function parseRobotIntent(text) {
     const normalized = text.toLowerCase().replace(/ё/g, "е");
-    const isCommand = /(езжаи|поезжаи|двигаися|двигаться|ходи|команду|робот|машин)/.test(normalized);
+    const isCommand = /(езжай|езжаи|поезжай|поезжаи|двигайся|двигаися|двигаться|ходи|команду|робот|машин)/.test(normalized);
     if (!isCommand) return null;
 
     const directions = [
