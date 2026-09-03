@@ -322,8 +322,29 @@ function parseRobotIntent(text) {
     const direction = directions.find(item => item.words.some(word => normalized.includes(word)));
     if (!direction) return null;
 
-    const durationMatch = normalized.match(/(\d+(?:[.,]\d+)?)\s*(секунд|секунды|секунду|с)/);
-    const duration = durationMatch ? Math.min(Math.max(Number(durationMatch[1].replace(",", ".")), 0.2), 30) : 0;
+    const numberWords = {
+        "один": 1,
+        "одну": 1,
+        "одна": 1,
+        "два": 2,
+        "две": 2,
+        "три": 3,
+        "четыре": 4,
+        "пять": 5,
+        "десять": 10,
+        "двадцать": 20
+    };
+    const durationMatch = normalized.match(/(\d+(?:[.,]\d+)?|один|одну|одна|два|две|три|четыре|пять|десять|двадцать)\s*(секунд(?:а|ы|у)?|минут(?:а|ы|у)?|с|мин)/);
+    let duration = 0;
+
+    if (durationMatch) {
+        const amount = numberWords[durationMatch[1]] || Number(durationMatch[1].replace(",", "."));
+        duration = durationMatch[2].startsWith("мин")
+            ? amount * 60
+            : amount;
+        duration = Math.min(Math.max(duration, 0.2), 30);
+    }
+
     return { command: direction.command, duration };
 }
 
